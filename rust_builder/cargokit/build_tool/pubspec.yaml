@@ -17,7 +17,7 @@ dependencies:
   path: 1.8.0
   version: 3.0.0
   collection: 1.18.0
-  ed25519_edwards: 0.3.1
+  ed25519_edwards: 1.0.0
   hex: 0.2.0
   yaml: 3.1.2
   source_span: 1.10.0
