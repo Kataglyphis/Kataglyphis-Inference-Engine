@@ -25,20 +25,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${GSTREAMER_ROOT}/cmake/modules/")
 # Find required packages
 find_package(PkgConfig REQUIRED)
 
-# Find GStreamer
+# Find GStreamer (REQUIRED will cause fatal error if not found)
 find_package(GStreamer REQUIRED)
-if(NOT GSTREAMER_FOUND)
-    message(FATAL_ERROR 
-        "GStreamer package not found.\n"
-        "Ensure GStreamer is properly installed and CMAKE_MODULE_PATH includes GStreamer cmake modules.\n"
-        "Current GSTREAMER_ROOT: ${GSTREAMER_ROOT}")
-endif()
 
 # Include directories for GStreamer
-if(GSTREAMER_FOUND)
-    include_directories(${GSTREAMER_INCLUDE_DIRS})
-    link_directories(${GSTREAMER_LIBRARY_DIRS})
-endif()
+# Note: Using legacy include_directories/link_directories for now
+# TODO: Switch to target_include_directories/target_link_libraries when native library is added
+include_directories(${GSTREAMER_INCLUDE_DIRS})
+link_directories(${GSTREAMER_LIBRARY_DIRS})
 
 # Add your native sources here
 # add_library(kataglyphis_native SHARED
