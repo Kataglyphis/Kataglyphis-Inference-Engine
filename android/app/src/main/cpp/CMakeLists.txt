@@ -7,7 +7,11 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add GStreamer path to CMAKE_MODULE_PATH
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/opt/gstreamer/1.26.7/cmake/modules/")
+# Allow override via GSTREAMER_ROOT environment variable or CMake variable
+if(NOT DEFINED GSTREAMER_ROOT)
+    set(GSTREAMER_ROOT "/opt/gstreamer/1.26.7")
+endif()
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${GSTREAMER_ROOT}/cmake/modules/")
 
 # Find required packages
 find_package(PkgConfig REQUIRED)
