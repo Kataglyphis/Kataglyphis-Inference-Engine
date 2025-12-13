@@ -1,0 +1,65 @@
+# This workflow builds the Android app with GStreamer native libraries
+
+name: Build Android App with GStreamer
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+env:
+  FLUTTER_VERSION: 3.38.3
+
+jobs:
+  build-android:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6.0.0
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Prepare GStreamer native libs for APK (copy to jniLibs)
+        run: |
+          set -euo pipefail
+
+          GST_ROOT="/opt/gstreamer"
+          MODULE_JNILIBS="ExternalLib/Kataglyphis_NativeInferencePlugin/android/src/main/jniLibs"
+
+          echo "GSTREAMER_ROOT=${GST_ROOT}"
+
+          ABIS=(arm64-v8a armeabi-v7a x86 x86_64)
+
+          mkdir -p "${MODULE_JNILIBS}"
+
+          for ABI in "${ABIS[@]}"; do
+            SRC_DIR="${GST_ROOT}/lib/${ABI}"
+            DEST_DIR="${MODULE_JNILIBS}/${ABI}"
+            if [ -d "${SRC_DIR}" ]; then
+              echo "Copying GStreamer libs for ${ABI} from ${SRC_DIR} -> ${DEST_DIR}"
+              mkdir -p "${DEST_DIR}"
+              cp -v "${SRC_DIR}"/*.so "${DEST_DIR}" || echo "No .so files found in ${SRC_DIR}"
+            else
+              echo "No GStreamer directory for ${ABI} at ${SRC_DIR}, skipping."
+            fi
+          done
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
